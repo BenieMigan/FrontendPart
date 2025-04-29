@@ -29,21 +29,29 @@ function Navbar() {
         {/* Liens de navigation */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-3">
-          <li className="nav-item">
-         <Link className="nav-link" to="/admin/documents">Documents générés</Link>
-        </li>
-
+            {/* Inscription Stagiaire */}
             <li className="nav-item">
               <Link className="nav-link active" to="/formulaire">Inscription Stagiaire</Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/attestation">Retirer Attestation</Link>
-            </li>
+
+            {/* Stagiaires par Département */}
             <li className="nav-item">
               <Link className="nav-link" to="/stagiaires-departement">Stagiaires par Département</Link>
             </li>
+
+            {/* Stagiaires au Port */}
             <li className="nav-item">
               <Link className="nav-link" to="/stagiaires-port">Stagiaires au Port</Link>
+            </li>
+
+            {/* Retirer Attestation */}
+            <li className="nav-item">
+              <Link className="nav-link" to="/attestation">Retirer Attestation</Link>
+            </li>
+
+            {/* Documents générés (dernière position) */}
+            <li className="nav-item">
+              <Link className="nav-link" to="/admin/documents">Documents générés</Link>
             </li>
           </ul>
         </div>
