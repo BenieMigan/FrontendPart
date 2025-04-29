@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { useState, useEffect } from "react";
 
 function StageForm() {
   const [formData, setFormData] = useState({
@@ -14,205 +13,186 @@ function StageForm() {
     consentement: false,
   });
 
-  const handleCancel = () => {
-    if (window.confirm('Voulez-vous vraiment annuler ? Les données seront perdues.')) {
-      setFormData({
-        civilite: '',
-        nom: '',
-        prenom: '',
-        email: '',
-        contactUrgent: '',
-        directions: [],
-        cv: null,
-        lettre: null,
-        consentement: false,
-      });
-    }
-  };
+  const [, setUsers] = useState([]);
 
-  const directions = [
-    'Direction des infrastructures',
-    'Direction commerciale et du marketing',
-    'Direction des Operations Portuaires et de la sécurité',
-    'Direction du controle des marchés Publics',
-    'Direction de l\'Administration et des Finances',
-    'Direction des Marchés Publics',
-    'Capitainerie du Port',
-    'Direction de l\'Audit Interne et du Contrôle Financier',
-    'Département des Ressources Humaines',
-    'Département des Systèmes d\'information',
-    'Département Qualité Santé Environnement',
-    'Direction des Affaires Juridiques et du Contentieux',
-    'Direction Générale',
-  ];
+  const handleCancel = () => {
+    setFormData({
+      civilite: '',
+      nom: '',
+      prenom: '',
+      email: '',
+      contactUrgent: '',
+      directions: [],
+      cv: null,
+      lettre: null,
+      consentement: false,
+    });
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => input.value = '');
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-
-    if (type === 'checkbox' && name === 'directions') {
-      let updated = [...formData.directions];
-      if (checked) {
-        if (updated.length < 3) updated.push(value);
-      } else {
-        updated = updated.filter((d) => d !== value);
-      }
-      setFormData({ ...formData, directions: updated });
-    } else if (type === 'checkbox') {
+    if (type === "checkbox") {
       setFormData({ ...formData, [name]: checked });
-    } else if (type === 'file') {
+    } else if (type === "file") {
       setFormData({ ...formData, [name]: files[0] });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleDirectionsChange = (e) => {
+    const options = e.target.options;
+    const selectedDirections = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) {
+        selectedDirections.push(options[i].value);
+      }
+    }
+    setFormData({ ...formData, directions: selectedDirections });
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/users");
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      } else {
+        console.error("Erreur lors du chargement des utilisateurs");
+      }
+    } catch (error) {
+      console.error("Erreur réseau :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Formulaire soumis:', formData);
-    alert('Formulaire prêt à être soumis');
+
+    const data = new FormData();
+    for (const key in formData) {
+      if (key === "directions") {
+        formData.directions.forEach((dir) => data.append("directions", dir));
+      } else {
+        data.append(key, formData[key]);
+      }
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/api/users", {
+        method: "POST",
+        body: data,
+      });
+
+      if (response.ok) {
+        alert("Utilisateur créé avec succès !");
+        e.target.reset();
+        setFormData({
+          civilite: '',
+          nom: '',
+          prenom: '',
+          email: '',
+          contactUrgent: '',
+          directions: [],
+          cv: null,
+          lettre: null,
+          consentement: false,
+        });
+        fetchUsers();
+      } else {
+        const errorData = await response.json();
+        alert(`Erreur: ${errorData.message || "Échec de la création"}`);
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      alert("Une erreur réseau est survenue");
+    }
   };
 
   return (
     <div className="container mt-5">
-      <form onSubmit={handleSubmit} className="border p-4 rounded shadow">
-        <h2 className="text-center mb-4">Demande de Stage</h2>
-
-        {/* Civilité */}
+      <div className="card shadow-lg">
+        <div className="card-header bg-primary text-white">
+          <h2 className="text-center mb-0">Inscription Stagiaire</h2>
+        </div>
+        
+        <div className="card-body p-4">
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="mb-3">
-          <label className="form-label">Civilité:</label>
-          <div className="d-flex gap-3">
-            <div>
-              <input type="radio" name="civilite" value="M" onChange={handleChange} /> M
-            </div>
-            <div>
-              <input type="radio" name="civilite" value="Mme" onChange={handleChange} /> Mme
-            </div>
-            <div>
-              <input type="radio" name="civilite" value="Mlle" onChange={handleChange} /> Mlle
-            </div>
-          </div>
+          <label className="form-label">Civilité :</label>
+          <select className="form-select" name="civilite" value={formData.civilite} onChange={handleChange} required>
+            <option value="">-- Choisir --</option>
+            <option value="M.">M.</option>
+            <option value="Mme">Mme</option>
+            <option value="Mlle">Mlle</option>
+          </select>
         </div>
-
-        {/* Nom & Prénom */}
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label className="form-label">Nom *</label>
-            <input
-              type="text"
-              name="nom"
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Prénom(s) *</label>
-            <input
-              type="text"
-              name="prenom"
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
-        </div>
-
-        {/* Email & Contact */}
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label className="form-label">Adresse Mail *</label>
-            <input
-              type="email"
-              name="email"
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Contact Urgent *</label>
-            <input
-              type="tel"
-              name="contactUrgent"
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
-        </div>
-
-        {/* Directions */}
+        
         <div className="mb-3">
-          <p>Choix de 3 directions maximum:</p>
-          <div className="row">
-            {directions.map((dir, index) => (
-              <div key={index} className="col-md-6">
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    name="directions"
-                    value={dir}
-                    onChange={handleChange}
-                    checked={formData.directions.includes(dir)}
-                    className="form-check-input"
-                  />
-                  <label className="form-check-label">{dir}</label>
-                </div>
-              </div>
-            ))}
-          </div>
+          <label className="form-label">Nom :</label>
+          <input type="text" className="form-control" name="nom" value={formData.nom} onChange={handleChange} required />
         </div>
-
-        {/* CV & Lettre */}
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label className="form-label">CV *</label>
-            <input
-              type="file"
-              name="cv"
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Lettre de recommandation *</label>
-            <input
-              type="file"
-              name="lettre"
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
-        </div>
-
-        {/* Consentement */}
         <div className="mb-3">
-          <div className="form-check">
-            <input
-              type="checkbox"
-              name="consentement"
-              onChange={handleChange}
-              required
-              className="form-check-input"
-            />
-            <label className="form-check-label">
-              J’accepte que mes informations soient utilisées pour traiter ma demande de stage.
-            </label>
-          </div>
+          <label className="form-label">Prénom :</label>
+          <input type="text" className="form-control" name="prenom" value={formData.prenom} onChange={handleChange} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Email :</label>
+          <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Contact d'Urgence :</label>
+          <input type="text" className="form-control" name="contactUrgent" value={formData.contactUrgent} onChange={handleChange} required />
         </div>
 
-        {/* Buttons */}
-        <div className="d-flex justify-content-between">
+        <div className="mb-3">
+          <label className="form-label">Directions :</label>
+          <select multiple className="form-select" name="directions" onChange={handleDirectionsChange}>
+            <option value="Direction des infrastructures">Direction des infrastructures</option>
+            <option value="Direction commerciale et du marketing">Direction commerciale et du marketing</option>
+            <option value="Direction des Operations Portuaires et de la sécurité">Direction des Operations Portuaires et de la sécurité</option>
+            <option value="Direction du controle des marchés Publics">Direction du controle des marchés Publics</option>
+            <option value="Direction de l'Administration et des Finances">Direction de l'Administration et des Finances</option>
+            <option value="Direction des Marchés Publics">Direction des Marchés Publics</option>
+            <option value="Capitainerie du Port">Capitainerie du Port</option>
+            <option value="Direction de l'Audit Interne et du Contrôle Financier">Direction de l'Audit Interne et du Contrôle Financier</option>
+            <option value="Département des Ressources Humaines">Département des Ressources Humaines</option>
+            <option value="Département des Systèmes d'information">Département des Systèmes d'information</option>
+            <option value="Département Qualité Santé Environnement">Département Qualité Santé Environnement</option>
+            <option value="Direction des Affaires Juridiques et du Contentieux">Direction des Affaires Juridiques et du Contentieux</option>
+            <option value="Direction Générale">Direction Générale</option>
+          </select>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">CV :</label>
+          <input type="file" className="form-control" name="cv" onChange={handleChange} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Lettre de Motivation :</label>
+          <input type="file" className="form-control" name="lettre" onChange={handleChange} required />
+        </div>
+        <div className="form-check mb-3">
+          <input type="checkbox" className="form-check-input" name="consentement" checked={formData.consentement} onChange={handleChange} />
+          <label className="form-check-label">J'accepte les conditions</label>
+        </div>
+
+        <div className="d-flex justify-content-between mt-4">
           <button type="submit" className="btn btn-primary">
-            Envoyer la demande
+            Soumettre
           </button>
-          <button type="button" onClick={handleCancel} className="btn btn-secondary">
+          <button type="button" className="btn btn-secondary" onClick={handleCancel}>
             Annuler
           </button>
         </div>
       </form>
+        </div>
+      </div>
     </div>
   );
 }
