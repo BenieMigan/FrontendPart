@@ -1,20 +1,14 @@
 import React from 'react';
-import Header from './components/Header';
-import StageForm from './components/StageForm';
-import Footer from './components/Footer';
-
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import StageForm from './components/StageForm'; // <<< ajoute ton formulaire utilisateur
 
 function App() {
   return (
-    <div className="App">
-      <Header /> 
+    <div className="container mt-3">
+      {/* Nouveau formulaire d'inscription */}
       <StageForm />
-      <Footer /> 
-
-    </div>
-    
+    </div> // <<< ici : la bonne fermeture
   );
-}
+};
 
 export default App;
