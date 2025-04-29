@@ -1,0 +1,32 @@
+
+/* Personnalisation de la navbar */
+.navbar {
+    border-bottom: 2px solid #f39c12; /* Ajouter une bordure sous la navbar */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre portée légère */
+  }
+  
+  .navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: #040404 !important; /* Couleur du texte de la marque */
+  }
+  
+  .navbar-nav .nav-item .nav-link {
+    color: #050606; /* Couleur des liens */
+    font-size: 16px;
+    margin-right: 15px;
+    transition: color 0.3s ease; /* Transition au survol */
+  }
+  
+  .navbar-nav .nav-item .nav-link:hover {
+    color: #f39c12; /* Couleur des liens au survol */
+  }
+  
+  .navbar-toggler {
+    border-color: #0e8faf; /* Couleur du bouton de menu responsive */
+  }
+  
+  .navbar-toggler-icon {
+    background-color: #0d0a0d; /* Couleur du menu hamburger */
+  }
+  
