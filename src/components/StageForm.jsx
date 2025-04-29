@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 function StageForm() {
+
   const [formData, setFormData] = useState({
     civilite: '',
     nom: '',
@@ -11,7 +12,12 @@ function StageForm() {
     cv: null,
     lettre: null,
     consentement: false,
+    typeStage: '',
+    nomEtablissement: '',
+    adresseEtablissement: '',
+    message: '',
   });
+  
 
   const [, setUsers] = useState([]);
 
@@ -26,7 +32,12 @@ function StageForm() {
       cv: null,
       lettre: null,
       consentement: false,
+      typeStage: '',
+      nomEtablissement: '',
+      adresseEtablissement: '',
+      message: '',
     });
+    
     const fileInputs = document.querySelectorAll('input[type="file"]');
     fileInputs.forEach(input => input.value = '');
   };
@@ -92,17 +103,21 @@ function StageForm() {
       if (response.ok) {
         alert("Utilisateur créé avec succès !");
         e.target.reset();
-        setFormData({
-          civilite: '',
-          nom: '',
-          prenom: '',
-          email: '',
-          contactUrgent: '',
-          directions: [],
-          cv: null,
-          lettre: null,
-          consentement: false,
-        });
+          setFormData({
+            civilite: '',
+            nom: '',
+            prenom: '',
+            email: '',
+            contactUrgent: '',
+            directions: [],
+            cv: null,
+            lettre: null,
+            consentement: false,
+            typeStage: '',
+            nomEtablissement: '',
+            adresseEtablissement: '',
+            message: '',
+          });
         fetchUsers();
       } else {
         const errorData = await response.json();
@@ -151,6 +166,38 @@ function StageForm() {
         </div>
 
         <div className="mb-3">
+  <label className="form-label">Type de Stage :</label>
+  <select className="form-select" name="typeStage" value={formData.typeStage} onChange={handleChange} required>
+    <option value="">-- Choisir --</option>
+    <option value="Stage académique">Stage académique</option>
+    <option value="Stage professionnel">Stage professionnel</option>
+  </select>
+</div>
+
+
+<div className="mb-3">
+  <label className="form-label">Nom de l'Établissement :</label>
+  <input type="text" className="form-control" name="nomEtablissement" value={formData.nomEtablissement} onChange={handleChange} />
+</div>
+
+<div className="mb-3">
+  <label className="form-label">Adresse de l'Établissement :</label>
+  <input type="text" className="form-control" name="adresseEtablissement" value={formData.adresseEtablissement} onChange={handleChange} />
+</div>
+
+<div className="mb-3">
+  <label className="form-label">Message :</label>
+  <textarea 
+    className="form-control" 
+    name="message" 
+    value={formData.message} 
+    onChange={handleChange} 
+    rows="4"
+    placeholder="Rédiger votre demande en précisant la date de début de stage et la date de fin de stage"
+    required
+  />
+</div>
+<div className="mb-3">
           <label className="form-label">Directions :</label>
           <select multiple className="form-select" name="directions" onChange={handleDirectionsChange}>
             <option value="Direction des infrastructures">Direction des infrastructures</option>
@@ -182,7 +229,7 @@ function StageForm() {
           <label className="form-check-label">J'accepte les conditions</label>
         </div>
 
-        <div className="d-flex justify-content-between mt-4">
+ <div className="d-flex justify-content-between mt-4">
           <button type="submit" className="btn btn-primary">
             Soumettre
           </button>
