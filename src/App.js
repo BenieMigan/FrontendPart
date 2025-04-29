@@ -1,6 +1,6 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useState } from 'react-router-dom';
 import StageForm from './components/StageForm';
 import DemandesAdmin from './components/DemandesAdmin';
 import Navbar from './components/Navbar';
@@ -8,11 +8,16 @@ import AttestationPage from './components/AttestationPage';
 import StagiairesDepartement from './components/StagiairesDepartement';
 import StagiairesPort from './components/StagiairesPort';
 import DocumentsAdmin from './components/DocumentsAdmin';
+import Login from './components/Login';
 
 function App() {
+  const user = {
+    nom: "Raisath",
+    role: "stagiaire", // ou "stagiaire"
+  };
   return (
     <Router>
-      <Navbar />
+<Navbar user={user} />
       <div className="container mt-3">
         <Routes>
           {/* Pages stagiaire */}

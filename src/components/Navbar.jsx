@@ -2,7 +2,7 @@ import React from 'react';
 import './Navbar.css';
 import { Link } from 'react-router-dom';
 
-function Navbar() {
+function Navbar({ user }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
       <div className="container-fluid">
@@ -29,30 +29,37 @@ function Navbar() {
         {/* Liens de navigation */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-3">
-            {/* Inscription Stagiaire */}
-            <li className="nav-item">
-              <Link className="nav-link active" to="/formulaire">Inscription Stagiaire</Link>
-            </li>
 
-            {/* Stagiaires par Département */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/stagiaires-departement">Stagiaires par Département</Link>
-            </li>
+            {/* Stagiaire : pages accessibles */}
+            {user.role === 'stagiaire' && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/formulaire">Inscription Stagiaire</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/stagiaires-departement">Stagiaires par Département</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/stagiaires-port">Stagiaires au Port</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/attestation">Retirer Attestation</Link>
+                </li>
+              </>
+            )}
 
-            {/* Stagiaires au Port */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/stagiaires-port">Stagiaires au Port</Link>
-            </li>
+            {/* Admin : pages admin */}
+            {user.role === 'admin' && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/admin/demandes">Demandes</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/admin/documents">Documents générés</Link>
+                </li>
+              </>
+            )}
 
-            {/* Retirer Attestation */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/attestation">Retirer Attestation</Link>
-            </li>
-
-            {/* Documents générés (dernière position) */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/admin/documents">Documents générés</Link>
-            </li>
           </ul>
         </div>
       </div>
