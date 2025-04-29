@@ -53,16 +53,23 @@ function StageForm() {
     }
   };
 
-  const handleDirectionsChange = (e) => {
-    const options = e.target.options;
-    const selectedDirections = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedDirections.push(options[i].value);
+  const handleDirectionCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    let updatedDirections = [...formData.directions];
+  
+    if (checked) {
+      if (updatedDirections.length >= 3) {
+        alert("Vous pouvez sélectionner au maximum 3 directions.");
+        return;
       }
+      updatedDirections.push(value);
+    } else {
+      updatedDirections = updatedDirections.filter(dir => dir !== value);
     }
-    setFormData({ ...formData, directions: selectedDirections });
+  
+    setFormData({ ...formData, directions: updatedDirections });
   };
+  
 
   const fetchUsers = async () => {
     try {
@@ -198,23 +205,41 @@ function StageForm() {
   />
 </div>
 <div className="mb-3">
-          <label className="form-label">Directions :</label>
-          <select multiple className="form-select" name="directions" onChange={handleDirectionsChange}>
-            <option value="Direction des infrastructures">Direction des infrastructures</option>
-            <option value="Direction commerciale et du marketing">Direction commerciale et du marketing</option>
-            <option value="Direction des Operations Portuaires et de la sécurité">Direction des Operations Portuaires et de la sécurité</option>
-            <option value="Direction du controle des marchés Publics">Direction du controle des marchés Publics</option>
-            <option value="Direction de l'Administration et des Finances">Direction de l'Administration et des Finances</option>
-            <option value="Direction des Marchés Publics">Direction des Marchés Publics</option>
-            <option value="Capitainerie du Port">Capitainerie du Port</option>
-            <option value="Direction de l'Audit Interne et du Contrôle Financier">Direction de l'Audit Interne et du Contrôle Financier</option>
-            <option value="Département des Ressources Humaines">Département des Ressources Humaines</option>
-            <option value="Département des Systèmes d'information">Département des Systèmes d'information</option>
-            <option value="Département Qualité Santé Environnement">Département Qualité Santé Environnement</option>
-            <option value="Direction des Affaires Juridiques et du Contentieux">Direction des Affaires Juridiques et du Contentieux</option>
-            <option value="Direction Générale">Direction Générale</option>
-          </select>
+  <label className="form-label">Directions (maximum 3) :</label>
+  <div className="row">
+    {[
+      "Direction des infrastructures",
+      "Direction commerciale et du marketing",
+      "Direction des Operations Portuaires et de la sécurité",
+      "Direction du controle des marchés Publics",
+      "Direction de l'Administration et des Finances",
+      "Direction des Marchés Publics",
+      "Capitainerie du Port",
+      "Direction de l'Audit Interne et du Contrôle Financier",
+      "Département des Ressources Humaines",
+      "Département des Systèmes d'information",
+      "Département Qualité Santé Environnement",
+      "Direction des Affaires Juridiques et du Contentieux",
+      "Direction Générale"
+    ].map((dir, index) => (
+      <div key={index} className="col-md-6">
+        <div className="form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            value={dir}
+            checked={formData.directions.includes(dir)}
+            onChange={handleDirectionCheckboxChange}
+            id={`direction-${index}`}
+          />
+          <label className="form-check-label" htmlFor={`direction-${index}`}>
+            {dir}
+          </label>
         </div>
+      </div>
+    ))}
+  </div>
+</div>
 
         <div className="mb-3">
           <label className="form-label">CV :</label>
