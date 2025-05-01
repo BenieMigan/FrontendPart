@@ -1,38 +1,33 @@
-.App {
-  text-align: center;
+/* Style pour le modal */
+.modal {
+  z-index: 1050;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.modal-content {
+  border: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f8f9fa;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  background-color: #f8f9fa;
 }
 
-.App-link {
-  color: #61dafb;
+/* Style pour les badges de statut */
+.badge {
+  padding: 0.5em 0.75em;
+  font-size: 0.875em;
+  font-weight: 600;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Style pour les sections */
+h6 {
+  color: #0d6efd;
+  margin-bottom: 1rem;
+  font-weight: 600;
 }

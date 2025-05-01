@@ -16,6 +16,11 @@ function StageForm() {
     nomEtablissement: '',
     adresseEtablissement: '',
     message: '',
+    filiere: '',
+    anneeAcademique: '',
+    dateDebut: '',
+    dateFin: '',
+
   });
   
 
@@ -36,6 +41,11 @@ function StageForm() {
       nomEtablissement: '',
       adresseEtablissement: '',
       message: '',
+      filiere: '',
+      anneeAcademique: '',
+      dateDebut: '',
+      dateFin: '',
+  
     });
     
     const fileInputs = document.querySelectorAll('input[type="file"]');
@@ -124,6 +134,10 @@ function StageForm() {
             nomEtablissement: '',
             adresseEtablissement: '',
             message: '',
+            filiere: '',
+            anneeAcademique: '',
+            dateDebut: '',
+            dateFin: '',        
           });
         fetchUsers();
       } else {
@@ -181,6 +195,15 @@ function StageForm() {
   </select>
 </div>
 
+    <div className="mb-3">
+  <label className="form-label">Annee Academique :</label>
+  <input type="text" className="form-control" name="anneeAcademique" value={formData.anneeAcademique} onChange={handleChange} />
+</div>
+
+<div className="mb-3">
+  <label className="form-label">Filiere :</label>
+  <input type="text" className="form-control" name="filiere" value={formData.filiere} onChange={handleChange} />
+</div>
 
 <div className="mb-3">
   <label className="form-label">Nom de l'Établissement :</label>
@@ -193,6 +216,16 @@ function StageForm() {
 </div>
 
 <div className="mb-3">
+  <label className="form-label">Date de debut :</label>
+  <input type="date" className="form-control" name="dateDebut" value={formData.dateDebut} onChange={handleChange} />
+</div>
+
+<div className="mb-3">
+  <label className="form-label">Date de Fin :</label>
+  <input type="date" className="form-control" name="dateFin" value={formData.dateFin} onChange={handleChange} />
+</div>
+
+<div className="mb-3">
   <label className="form-label">Message :</label>
   <textarea 
     className="form-control" 
@@ -200,7 +233,7 @@ function StageForm() {
     value={formData.message} 
     onChange={handleChange} 
     rows="4"
-    placeholder="Rédiger votre demande en précisant la date de début de stage et la date de fin de stage"
+    placeholder="Rédiger votre demande en quelques lignes"
     required
   />
 </div>

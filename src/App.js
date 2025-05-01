@@ -13,6 +13,7 @@ function App() {
           <Route path="/" element={<Navigate to="/stagiaire" />} />
           <Route path="/stagiaire" element={<StageForm />} />
           <Route path="/rh" element={<RHValidation />} />
+          
         </Routes>
       </div>
     </Router>
