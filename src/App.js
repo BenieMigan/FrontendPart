@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import StageForm from './components/StageForm';
-import ValidationRH from './components/ValidationRH';
+import RHValidation from './components/RHValidation';
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/stagiaire" />} />
           <Route path="/stagiaire" element={<StageForm />} />
-          <Route path="/rh" element={<ValidationRH />} />
+          <Route path="/rh" element={<RHValidation />} />
         </Routes>
       </div>
     </Router>
