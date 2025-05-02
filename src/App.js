@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import StageForm from './components/StageForm';
 import RHValidation from './components/RHValidation';
+import UploadAssurance from './components/UploadAssurance';
+
 
 function App() {
   return (
@@ -13,7 +15,9 @@ function App() {
           <Route path="/" element={<Navigate to="/stagiaire" />} />
           <Route path="/stagiaire" element={<StageForm />} />
           <Route path="/rh" element={<RHValidation />} />
-          
+
+         <Route path="/upload-assurance" element={<UploadAssurance />} />
+
         </Routes>
       </div>
     </Router>

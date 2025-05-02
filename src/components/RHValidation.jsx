@@ -40,10 +40,13 @@ function RHValidation() {
             }
             
             const updatedDemande = await response.json();
+            
+            // Mise à jour optimiste de l'UI
             setDemandes(demandes.map(d => 
                 d.id === updatedDemande.id ? updatedDemande : d
             ));
-            alert("Demande validée avec succès !");
+            
+            alert("Demande validée avec succès ! Un email a été envoyé au stagiaire.");
         } catch (error) {
             console.error("Erreur:", error);
             alert(error.message);
@@ -57,11 +60,18 @@ function RHValidation() {
             });
             
             if (response.ok) {
-                fetchDemandes();
-                alert("Demande rejetée !");
+                const updatedDemande = await response.json();
+                setDemandes(demandes.map(d => 
+                    d.id === updatedDemande.id ? updatedDemande : d
+                ));
+                alert(`Demande ${id} rejetée !`);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Erreur serveur");
             }
         } catch (error) {
             console.error("Erreur:", error);
+            alert(`Échec du rejet : ${error.message}`);
         }
     };
 
