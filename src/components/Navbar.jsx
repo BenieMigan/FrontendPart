@@ -3,6 +3,7 @@ import './Navbar.css';
 import { Link } from 'react-router-dom';
 
 function Navbar({ user }) {
+  const isAuthenticated = !!user; // Vérifie si un utilisateur est authentifié
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
       <div className="container-fluid">
@@ -12,8 +13,6 @@ function Navbar({ user }) {
           alt="Logo Port Autonome"
           style={{ height: "40px", marginRight: "15px" }}
         />
-
-        {/* Bouton burger (mobile) */}
         <button
           className="navbar-toggler"
           type="button"
@@ -25,46 +24,52 @@ function Navbar({ user }) {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-
-        {/* Liens de navigation */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-3">
-
-            {/* Stagiaire : pages accessibles */}
-            {user.role === 'stagiaire' && (
+            {isAuthenticated ? (
               <>
+                {user.role === 'stagiaire' && (
+                  <>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/formulaire">Inscription Stagiaire</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/stagiaires-departement">Stagiaires par Département</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/stagiaires-port">Stagiaires au Port</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/attestation">Retirer Attestation</Link>
+                    </li>
+                  </>
+                )}
+
+                {user.role === 'admin' && (
+                  <>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/admin/demandes">Demandes</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/admin/documents">Documents générés</Link>
+                    </li>
+                  </>
+                )}
                 <li className="nav-item">
-                  <Link className="nav-link" to="/formulaire">Inscription Stagiaire</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/stagiaires-departement">Stagiaires par Département</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/stagiaires-port">Stagiaires au Port</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/attestation">Retirer Attestation</Link>
+                  <Link className="nav-link" to="/login" onClick={() => { localStorage.removeItem('token'); window.location.reload(); }}>
+                    Déconnexion
+                  </Link>
                 </li>
               </>
+            ) : (
+              <li className="nav-item">
+                <Link className="nav-link" to="/login">Se Connecter</Link>
+              </li>
             )}
-
-            {/* Admin : pages admin */}
-            {user.role === 'admin' && (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/admin/demandes">Demandes</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/admin/documents">Documents générés</Link>
-                </li>
-              </>
-            )}
-
           </ul>
         </div>
       </div>
     </nav>
   );
 }
-
 export default Navbar;

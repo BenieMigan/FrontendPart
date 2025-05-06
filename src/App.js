@@ -13,7 +13,7 @@ import Login from './components/Login';
 import SuiteInscription from './components/SuiteInscription';
 import AssuranceUpload from './components/AssuranceUpload';
 import AuthPage from './pages/AuthPage';
-import PasswordResetPage from './pages/PasswordResetPage';
+import PasswordResetPage from './pages/RequestResetCode';
 
 
 
