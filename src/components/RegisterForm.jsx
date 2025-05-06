@@ -1,80 +1,71 @@
-// src/components/RegisterForm.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
 
-const RegisterForm = () => {
+function Register() {
   const [formData, setFormData] = useState({
+    civilite: '',
     nom: '',
     prenom: '',
-    civilite: '',
     email: '',
-    password: '',
+    motDePasse: '',
+    confirmerMotDePasse: ''
   });
 
-  const navigate = useNavigate();
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({...formData, [e.target.name]: e.target.value});
+  const handleChange = e => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
-    try {
-      // Remplace l'URL par celle de ton backend
-      const response = await fetch('http://localhost:8080/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    if (formData.motDePasse !== formData.confirmerMotDePasse) {
+      setError("Les mots de passe ne correspondent pas.");
+      setSuccess('');
+      return;
+    }
 
-      if (response.ok) {
-        setMessage('Compte créé avec succès !');
-        navigate('/'); // Redirection vers la page de login
-      } else {
-        setMessage("Erreur lors de la création du compte");
-      }
-    } catch (error) {
-      console.error(error);
-      setMessage("Erreur réseau");
+    try {
+      const { confirmerMotDePasse, ...dataToSend } = formData;
+      await axios.post('http://localhost:8080/api/auth/register', dataToSend);
+      setSuccess("Compte créé avec succès !");
+      setError('');
+    } catch (err) {
+      setError("Erreur lors de la création du compte.");
+      setSuccess('');
     }
   };
 
   return (
-    <div className="container col-md-6 mt-5">
-      <h3>Créer un compte stagiaire</h3>
-      {message && <div className="alert alert-info">{message}</div>}
+    <div className="container mt-4" style={{ maxWidth: '400px' }}>
+      <h4>Créer un compte</h4>
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Civilité</label>
-          <select className="form-select" name="civilite" value={formData.civilite} onChange={handleChange} required>
-            <option value="">Choisir...</option>
-            <option value="M.">M.</option>
-            <option value="Mme">Mme</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label>Nom</label>
-          <input type="text" className="form-control" name="nom" value={formData.nom} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label>Prénom</label>
-          <input type="text" className="form-control" name="prenom" value={formData.prenom} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label>Email</label>
-          <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label>Mot de passe</label>
-          <input type="password" className="form-control" name="password" value={formData.password} onChange={handleChange} required />
-        </div>
-        <button type="submit" className="btn btn-primary">Créer un compte</button>
+        <select
+          name="civilite"
+          className="form-control mb-2"
+          onChange={handleChange}
+          required
+        >
+          <option value="">-- Civilité --</option>
+          <option value="M.">M.</option>
+          <option value="Mme">Mme</option>
+        </select>
+
+        <input name="nom" placeholder="Nom" className="form-control mb-2" onChange={handleChange} required />
+        <input name="prenom" placeholder="Prénom" className="form-control mb-2" onChange={handleChange} required />
+        <input type="email" name="email" placeholder="Email" className="form-control mb-2" onChange={handleChange} required />
+        <input type="password" name="motDePasse" placeholder="Mot de passe" className="form-control mb-2" onChange={handleChange} required />
+        <input type="password" name="confirmerMotDePasse" placeholder="Confirmer le mot de passe" className="form-control mb-2" onChange={handleChange} required />
+
+        <button type="submit" className="btn btn-primary w-100">S'inscrire</button>
       </form>
+
+      {error && <div className="alert alert-danger mt-2">{error}</div>}
+      {success && <div className="alert alert-success mt-2">{success}</div>}
     </div>
   );
-};
+}
 
-export default RegisterForm;
+export default Register;
