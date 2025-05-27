@@ -2,3 +2,13 @@ netstat -ano | findstr :8080
 
 taskkill /PID [PID] /F
 
+//
+sa se passe comme prevu a pars le fait que je veux que pour une demande ayant finaliser les dossiers lorsquon le supprime le nombre de place restant augmente
+
+
+
+  
+
+
+
+ 

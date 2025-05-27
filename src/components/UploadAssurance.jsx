@@ -7,7 +7,8 @@ function UploadAssurance() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
+    const [uploadSuccess, setUploadSuccess] = useState(false); // Renommé pour éviter confusion
+    const [docGenerated, setDocGenerated] = useState(false); // Nouvel état pour le document généré
     
     const location = useLocation();
     const navigate = useNavigate();
@@ -49,10 +50,10 @@ function UploadAssurance() {
 
         try {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('assurance', file); // <-- Changé de 'file' à 'assurance' pour matcher le backend
             formData.append('token', token);
 
-            const response = await axios.put(
+            await axios.put(
                 `http://localhost:8080/api/users/${user.id}/upload-assurance`,
                 formData,
                 {
@@ -62,13 +63,37 @@ function UploadAssurance() {
                 }
             );
 
-            setSuccess(true);
-            setTimeout(() => navigate('/confirmation'), 3000);
+            setUploadSuccess(true);
         } catch (err) {
-            setError("Erreur lors de l'upload du fichier");
+            setError("Erreur lors de l'upload du fichier: " + (err.response?.data?.message || err.message));
         }
     };
 
+    const handleGenerateDocument = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:8080/api/users/${user.id}/generate-note-service?token=${token}`,
+            {
+              method: 'GET',
+              headers: { 'Authorization': `Bearer ${token}` }
+            }
+          );
+      
+          if (!response.ok) throw new Error('Erreur serveur');
+      
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'note-service.pdf';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        } catch (error) {
+          console.error("Erreur:", error);
+          setError("Échec de génération : " + error.message);
+        }
+      };
     if (loading) {
         return <div className="container mt-5">Chargement en cours...</div>;
     }
@@ -84,16 +109,6 @@ function UploadAssurance() {
         );
     }
 
-    if (success) {
-        return (
-            <div className="container mt-5">
-                <div className="alert alert-success">
-                    Fiche d'assurance uploadée avec succès ! Redirection en cours...
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="container mt-5">
             <div className="card">
@@ -102,30 +117,61 @@ function UploadAssurance() {
                 </div>
                 <div className="card-body">
                     <p>Bonjour {user.prenom} {user.nom},</p>
-                    <p>
-                        Veuillez uploader votre fiche d'assurance pour finaliser votre candidature.
-                        Le fichier doit être au format PDF, JPG ou PNG et ne doit pas dépasser 5Mo.
-                    </p>
                     
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-3">
-                            <label htmlFor="ficheAssurance" className="form-label">
-                                Fiche d'assurance
-                            </label>
-                            <input
-                                type="file"
-                                className="form-control"
-                                id="ficheAssurance"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={handleFileChange}
-                                required
-                            />
+                    {!uploadSuccess ? (
+                        <>
+                            <p>
+                                Veuillez uploader votre fiche d'assurance pour finaliser votre candidature.
+                                Le fichier doit être au format PDF, JPG ou PNG et ne doit pas dépasser 5Mo.
+                            </p>
+                            
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-3">
+                                    <label htmlFor="ficheAssurance" className="form-label">
+                                        Fiche d'assurance
+                                    </label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        id="ficheAssurance"
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        onChange={handleFileChange}
+                                        required
+                                    />
+                                </div>
+                                
+                                <button type="submit" className="btn btn-primary">
+                                    Envoyer
+                                </button>
+                            </form>
+                        </>
+                    ) : (
+                        <div className="alert alert-success">
+                            <div className="d-flex justify-content-between align-items-center">
+                                <span>✅ Fiche d'assurance validée avec succès !</span>
+                                
+                                {!docGenerated ? (
+                                    <button 
+                                        onClick={handleGenerateDocument}
+                                        className="btn btn-success"
+                                    >
+                                        <i className="bi bi-download me-2"></i>
+                                        Générer la Note de Service
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={handleGenerateDocument}
+                                        className="btn btn-outline-success"
+                                    >
+                                        <i className="bi bi-download me-2"></i>
+                                        Télécharger à nouveau
+                                    </button>
+                                )}
+                            </div>
+                            
+                           
                         </div>
-                        
-                        <button type="submit" className="btn btn-primary">
-                            Envoyer
-                        </button>
-                    </form>
+                    )}
                 </div>
             </div>
         </div>
