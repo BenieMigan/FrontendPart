@@ -52,7 +52,7 @@ function RHSpace() {
                 <h5 className="fw-bold">Valider les demandes</h5>
                 <p>Consultez et approuvez les demandes de stage reçues.</p>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button variant="primary" onClick={() => navigate('/rh/login')}>
+                  <Button variant="primary" onClick={() => navigate('/rh/dashboard')}>
                     Accéder aux demandes
                   </Button>
                 </motion.div>
@@ -70,7 +70,7 @@ function RHSpace() {
       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
         <Button
           variant="warning"
-          onClick={() => navigate('/loginrh')}> 
+          onClick={() => navigate('/rh-tableauDeBord')}> 
                  Accéder au dashboard
           </Button>
       </motion.div>

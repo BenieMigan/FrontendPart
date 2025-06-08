@@ -1,14 +1,11 @@
-import { useState } from 'react';
-import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useAuth } from './AuthContext';
 
 
-const Login = () => {
-
-  const { login } = useAuth();
+const LoginDashboard = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -28,59 +25,55 @@ const Login = () => {
     }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-  try {
-    let response;
+    try {
+
+           if (formData.email === "resourcehumaine@pac.bj" && formData.password === "Admin123@rhPassword@12") {
+        const rhResponse = await fetch('http://localhost:8080/api/auth/login/rh', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: "resourcehumaine@pac.bj",
+            password: "Admin123@rhPassword@12"
+          }),
+        });
+
+        if (rhResponse.ok) {
+          const data = await rhResponse.json();
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          return navigate('/rhspace');
+        }
+      }
+
     
-    // Connexion RH
-    if (formData.email === "resourcehumaine@pac.bj" && formData.password === "Admin123@rhPassword@12") {
-      response = await fetch('http://localhost:8080/api/auth/login/rh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email, // Utilisez les données du formulaire
-          password: formData.password
-        }),
-      });
-    } 
-    // Connexion Stagiaire
-    else {
-      response = await fetch('http://localhost:8080/api/auth/login/stagiaire', {
+      const stagiaireResponse = await fetch('http://localhost:8080/api/auth/login/stagiaire', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
+
+      if (!stagiaireResponse.ok) {
+        const errorData = await stagiaireResponse.json();
+        throw new Error(errorData.message || "Email ou mot de passe incorrect");
+      }
+
+      const data = await stagiaireResponse.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      navigate('/dashboardStagiaire');
+
+    } catch (err) {
+      setError(err.message || "Erreur lors de la connexion");
     }
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Email ou mot de passe incorrect");
-    }
-
-    const data = await response.json();
-    
-    // Utilisez la fonction login du contexte qui gère le localStorage
-    login(data.user, data.token);
-
-    // Redirection en fonction du rôle
-    if (data.user.role === 'RH') {
-      navigate('/rhspace');
-    } else {
-      navigate('/stagiaire');
-    }
-
-  } catch (err) {
-    setError(err.message || "Erreur lors de la connexion");
-  }
-};
-  
+  };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
@@ -249,4 +242,10 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default Login;
+export default LoginDashboard;
+
+  
+
+
+
+ 

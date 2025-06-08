@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Badge, Spinner, Alert, Card, Row, Col } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, Col, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { BsArrowLeftCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Container , Form} from 'react-bootstrap';
+
 
 function ListeDemandesRH() {
   const [demandes, setDemandes] = useState([]);
@@ -37,7 +40,57 @@ function ListeDemandesRH() {
 
     fetchDemandes();
   }, []);
+// Ajouter cette fonction pour valider la fiche d'assurance
+const validerFicheAssurance = async (stagiaireId) => {
+  if (!window.confirm('Êtes-vous sûr de vouloir valider cette fiche d\'assurance ? Cette action permettra au stagiaire de télécharger ses documents administratifs.')) {
+    return;
+  }
 
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `http://localhost:8080/api/rh/valider-fiche-assurance/${stagiaireId}`,
+      {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }
+    );
+
+    if (!response.ok) throw new Error(await response.text());
+
+    const result = await response.json();
+    toast.success(result.message);
+    updateLocalStatut(stagiaireId, result.statut);
+  } catch (err) {
+    toast.error(err.message);
+  }
+};
+
+ const rejeterFicheAssurance = async (id) => {
+  if (!window.confirm('Êtes-vous sûr de vouloir rejeter cette fiche d\'assurance ? Cette action supprimera définitivement la demande et enverra une notification au stagiaire.')) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(
+      `http://localhost:8080/api/rh/rejeter-demande-assurance/${id}`,
+      {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }
+    );
+
+    if (!response.ok) throw new Error(await response.text());
+
+    const result = await response.json();
+    toast.success(result.message);
+    // Mettre à jour la liste locale
+    setDemandes(prev => prev.filter(d => d.id !== id));
+  } catch (err) {
+    toast.error(err.message);
+  }
+};
   const updateLocalStatut = (id, newStatut) => {
     setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: newStatut } : d));
     if (selectedDemande?.id === id) {
@@ -65,7 +118,14 @@ const updateStatut = async (id, statut) => {
       body: JSON.stringify({ statut })
     });
 
-    if (!response.ok) throw new Error("Échec de la mise à jour");
+    // Gérer la réponse différemment selon le statut
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error || errorData.message || "Échec de la mise à jour";
+      throw new Error(errorMessage);
+    }
+
+    const responseData = await response.json();
     
     if (statut === 'REJETEE') {
       setDemandes(prev => prev.filter(d => d.id !== id));
@@ -84,12 +144,13 @@ const updateStatut = async (id, statut) => {
       updateLocalStatut(id, statut);
     }
   } catch (err) {
+    // Utiliser une alerte plus propre ou un toast
     alert(`Erreur: ${err.message}`);
   }
 };
 
 const handleDeleteDemande = async (id) => {
-  if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette demande ? Cela libérera les places si elle était finalisée.')) {
+  if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette demande ? ')) {
     return;
   }
 
@@ -112,12 +173,15 @@ const handleDeleteDemande = async (id) => {
 };
 
 
-const getBadge = (statut) => {
+// Modifier le badge pour inclure les nouveaux statuts
+  const getBadge = (statut) => {
     switch (statut) {
       case 'VALIDEE': return <Badge bg="success">Validée</Badge>;
       case 'REJETEE': return <Badge bg="danger">Rejetée</Badge>;
-      case 'DOCUMENT_COMPLET': return <Badge bg="info">Documents Complets</Badge>;
-      default: return <Badge bg="warning">En attente</Badge>;
+      case 'EN_ATTENTE_VALIDATION': return <Badge bg="warning">Fiche à valider</Badge>;
+      case 'FICHE_ASSURANCE_VALIDEE': return <Badge bg="info">Fiche validée</Badge>;
+      case 'DOCUMENT_COMPLET': return <Badge bg="primary">Finalisée</Badge>;
+      default: return <Badge bg="secondary">En attente</Badge>;
     }
   };
 
@@ -150,55 +214,61 @@ const getBadge = (statut) => {
                   <td>{demande.email}</td>
                   <td>{getBadge(demande.statut)}</td>
                   <td>{new Date(demande.dateSoumission).toLocaleDateString()}</td>
-                  <td>
-                    {demande.ficheAssurancePath ? (
-                      <Button variant="outline-success" size="sm" onClick={async () => {
+  <td>
+    {demande.ficheAssurancePath ? (
+         <Button variant="outline-primary" onClick={async () => {
                         const token = localStorage.getItem('token');
-                        try {
-                          const response = await fetch(`http://localhost:8080/api/rh/documents/${demande.id}/assurance`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                          });
-
-                          if (response.ok) {
-                            const blob = await response.blob();
-                            const url = window.URL.createObjectURL(blob);
-                            window.open(url, '_blank');
-                            updateLocalStatut(demande.id, 'DOCUMENT_COMPLET');
-                          } else {
-                            alert('Erreur lors de l\'ouverture de la fiche d\'assurance');
-                          }
-                        } catch (err) {
-                          alert('Erreur: ' + err.message);
+                        const response = await fetch(`http://localhost:8080/api/rh/voir-fiche-assurance/${demande.id}`, {
+                          headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          window.open(url, '_blank');
+                        } else {
+                          alert('Erreur lors de l\'ouverture de l"assurance');
                         }
-                      }}>
-                        Voir
-                      </Button>
-                    ) : (
-                      <span className="text-muted">Non fournie</span>
-                    )}
-                  </td>
+                      }}>Voir Assurance</Button>
+                  
+    ) : (
+      <span className="text-muted">Non fournie</span>
+    )}
+  </td>
+
      <td>
   <Button variant="info" size="sm" className="me-2" onClick={() => { setSelectedDemande(demande); setShowModal(true); }}>
     Détails
   </Button>
-  <Button 
-    variant="success" 
-    size="sm" 
-    className="me-2" 
-    disabled={demande.statut === 'VALIDEE' || demande.statut === 'DOCUMENT_COMPLET'}
-    onClick={() => window.confirm('Êtes-vous sûr ?') && updateStatut(demande.id, 'VALIDEE')}
-  >
-    Valider
-  </Button>
-  <Button 
-    variant="danger" 
-    size="sm" 
-    className="me-2" 
-    disabled={demande.statut === 'REJETEE' || demande.statut === 'VALIDEE' || demande.statut === 'DOCUMENT_COMPLET'}
-    onClick={() => updateStatut(demande.id, 'REJETEE')}
-  >
-    Rejeter
-  </Button>
+ <Button 
+  variant="success" 
+  size="sm" 
+  className="me-2" 
+  disabled={['VALIDEE', 'DOCUMENT_COMPLET', 'EN_ATTENTE_VALIDATION', 'FICHE_ASSURANCE_VALIDEE'].includes(demande.statut)}
+  onClick={() => window.confirm('Êtes-vous sûr ?') && updateStatut(demande.id, 'VALIDEE')}
+>
+  Valider
+</Button>
+
+{/* Dans la colonne Actions */}
+{demande.statut === 'EN_ATTENTE_VALIDATION' && (
+  <>
+    <Button
+      variant="success"
+      size="sm"
+      className="me-2"
+      onClick={() => validerFicheAssurance(demande.id)}
+    >
+      Valider fiche
+    </Button>
+    <Button
+      variant="danger"
+      size="sm"
+      onClick={() => rejeterFicheAssurance(demande.id)}
+    >
+      Rejeter fiche
+    </Button>
+  </>
+)} 
   <Button 
     variant="outline-danger" 
     size="sm" 
@@ -307,22 +377,17 @@ const getBadge = (statut) => {
                         }
                       }}>Voir Lettre</Button>
 
-                      <Button variant="outline-success" onClick={async () => {
+                      <Button variant="outline-primary" onClick={async () => {
                         const token = localStorage.getItem('token');
-                        try {
-                          const response = await fetch(`http://localhost:8080/api/rh/documents/${selectedDemande.id}/assurance`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                          });
-                          if (response.ok) {
-                            const blob = await response.blob();
-                            const url = window.URL.createObjectURL(blob);
-                            window.open(url, '_blank');
-                            updateLocalStatut(selectedDemande.id, 'DOCUMENT_COMPLET');
-                          } else {
-                            alert('Erreur lors de l\'ouverture de la fiche d\'assurance');
-                          }
-                        } catch (err) {
-                          alert('Erreur: ' + err.message);
+                        const response = await fetch(`http://localhost:8080/api/rh/voir-fiche-assurance/${selectedDemande.id}`, {
+                          headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          window.open(url, '_blank');
+                        } else {
+                          alert('Erreur lors de l\'ouverture de l"assurance');
                         }
                       }}>Voir Assurance</Button>
                     </div>
@@ -330,6 +395,40 @@ const getBadge = (statut) => {
                 </Card>
               </Modal.Body>
              <Modal.Footer>
+            {/* Après la modal existante */}
+<Modal show={selectedDemande?.action === 'rejet'} onHide={() => setSelectedDemande(null)}>
+  <Modal.Header closeButton>
+    <Modal.Title>Motif de rejet</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Form.Group>
+      <Form.Label>Veuillez indiquer le motif de rejet :</Form.Label>
+      <Form.Control 
+        as="textarea" 
+        rows={3} 
+        onChange={(e) => setSelectedDemande({
+          ...selectedDemande, 
+          motifRejet: e.target.value
+        })}
+      />
+    </Form.Group>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setSelectedDemande(null)}>
+      Annuler
+    </Button>
+    <Button 
+      variant="danger" 
+      onClick={() => {
+        rejeterFicheAssurance(selectedDemande.id, selectedDemande.motifRejet);
+        setSelectedDemande(null);
+      }}
+      disabled={!selectedDemande?.motifRejet}
+    >
+      Confirmer le rejet
+    </Button>
+  </Modal.Footer>
+</Modal>
   <Button variant="secondary" onClick={() => setShowModal(false)}>Fermer</Button>
   <Button 
     variant="success" 

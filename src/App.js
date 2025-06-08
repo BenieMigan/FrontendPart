@@ -1,89 +1,74 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import StagiaireSpace from './components/StagiaireSpace'; // ajouter ceci en haut
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
-
-import StageForm from './components/StageForm';
-import RHValidation from './components/RHValidation';
-import UploadAssurance from './components/UploadAssurance';
-import Register from './components/Register';
-import Login from './components/Login';
-import LoginRH from './components/LoginRH';
-import LoginTableauDeBord from './components/LoginTableauDeBord';
 import DashboardRH from './components/DashboardRH';
+import DashboardStagiaire from "./components/DashboardStagiaire";
 import FinalisationDemande from './components/FinalisationDemande';
-import TableauDeBord from './components/TableauDeBord';
-import PrivateRoute from "./components/PrivateRoute";
+import Login from './components/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 import RHSpace from "./components/RHSpace";
+import RHValidation from './components/RHValidation';
+import Register from './components/Register';
+import ResetPassword from "./components/ResetPassword";
+import StageForm from './components/StageForm';
+import StagiaireSpace from './components/StagiaireSpace';
+import TableauDeBord from './components/TableauDeBord';
+import UploadAssurance from './components/UploadAssurance';
+import DocumentDownload from './components/DocumentDownload';
 
-
-// Ajoutez cette route protégée
-
-
+          
 
 function App() {
   return (
     <Router>
       <div className="container mt-3">
-
         <Routes>
           <Route path="/rh" element={<RHValidation />} />
           <Route path="/register" element={<Register />} />
-        <Route path="/rh/login" element={<LoginRH />} />
-        <Route path="/finalisation/:token" element={<FinalisationDemande />} />
-          <Route path="/" element={<StagiaireSpace />} /> 
-        <Route path="/upload-assurance" element={<UploadAssurance />} />
+          <Route path="/stagiaire" element={<StagiaireSpace />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/upload-assurance" element={<UploadAssurance />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/demandeStage" element={<StageForm />} />
+          <Route path="/dashboardStagiaire" element={<DashboardStagiaire />} />
+          <Route path="/rh/dashboard" element={<DashboardRH />} />
+          <Route path="/rh-tableauDeBord" element={<TableauDeBord />} />
 
-          <Route path="/login" element={<Login />} />
-        <Route
-          path="/stagiaire"
-          element={
-            <PrivateRoute>
-              <StageForm />
-            </PrivateRoute>
-          }
-        />
+          <Route path="/stagiaire" element={
+            <ProtectedRoute allowedRoles={['STAGIAIRE']}>
+              <StagiaireSpace />
+            </ProtectedRoute>
+          } />
 
-         <Route 
-          path="/rh/dashboard" 
-          element={
-            <ProtectedRouteRH>
-              <DashboardRH />
-            </ProtectedRouteRH>
-          } 
-        />
-
-        
-         <Route 
-          path="/rh-tableauDeBord" 
-          element={
-            <ProtectedRouteRH>
-              <TableauDeBord />
-            </ProtectedRouteRH>
-          } 
-        />
-
-        <Route path="/rhspace" element={<RHSpace />} />
-        <Route path="/loginrh" element={<LoginTableauDeBord />} />
+<Route 
+  path="/telecharger-documents" 
+  element={
+    <ProtectedRoute allowedRoles={['STAGIAIRE']} requiredStatus="FICHE_ASSURANCE_VALIDEE">
+      <DocumentDownload />
+    </ProtectedRoute>
+  } 
+/>
 
 
+
+        <Route 
+  path="/finalisation" 
+  element={
+    <ProtectedRoute allowedRoles={['STAGIAIRE']} requiredStatus="VALIDEE">
+      <FinalisationDemande />
+    </ProtectedRoute>
+  } 
+/>
+
+          <Route path="/rhspace" element={
+            <ProtectedRoute allowedRoles={['RH']}>
+              <RHSpace />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
     </Router>
   );
 }
-
-// Composant de protection de route
-function ProtectedRouteRH({ children }) {
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    return <Navigate to="/rh/login" replace />;
-  }
-
-  return children;
-}
-
 
 export default App;

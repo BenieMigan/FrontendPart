@@ -1,73 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Form, Button, Alert, Spinner, Card, Row, Col } from 'react-bootstrap';
-import { BsArrowLeftCircleFill } from 'react-icons/bs';
-import axios from 'axios';
+import { Button, Card, Alert, Spinner, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-function FinalisationDemande() {
-  const { token } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [demande, setDemande] = useState(null);
+const FinalisationDemande = () => {
   const [file, setFile] = useState(null);
-  const [success, setSuccess] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [userData, setUserData] = useState(null);
+  const navigate = useNavigate();
 
-  // Liste des images statiques à télécharger
+  useEffect(() => { 
 
-  const [downloads, setDownloads] = useState({
-  noteService: false,
-  demandeStage: false,
-  staticattestation: false,
-  staticB: false,
-  staticorganigramme: false
-});
-
-const allDownloaded = Object.values(downloads).every(Boolean);
-
-
-  const staticDocuments = [
-    { 
-      name: 'attestation.jpg', 
-      displayName: 'Fiche d\'attestation',
-      description: 'Telecharger votre fiche d\'attestation'
-    },
-    { 
-      name: 'B.jpg', 
-      displayName: 'Engagement personnel',
-      description: 'Engagement personnel pour les stagiaires'
-    },
-    { 
-      name: 'organigramme.jpg', 
-      displayName: 'Organigramme du pac',
-      description: 'Plan pour accéder à nos locaux'
+    // Récupérer les données de l'utilisateur depuis le localStorage
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || user.role !== 'STAGIAIRE' || user.statut !== 'VALIDEE' ) {
+      navigate('/');
     }
-  ];
+    setUserData(user);
+  }, [navigate]);
 
-  useEffect(() => {
-    const validateToken = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/api/users/validate-finalization-token?token=${token}`
-        );
-        
-        if (response.data.error) {
-          throw new Error(response.data.error);
-        }
-        
-        setDemande(response.data);
-      } catch (err) {
-        setError(err.response?.data?.error || err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    validateToken();
-  }, [token]);
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,297 +32,123 @@ const allDownloaded = Object.values(downloads).every(Boolean);
       return;
     }
 
+    setLoading(true);
+    setError('');
+
     try {
-      setUploading(true);
-      setError('');
-      
+      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('assurance', file);
-      formData.append('token', token);
 
-      const response = await axios.put(
-        `http://localhost:8080/api/users/${demande.id}/upload-assurance`,
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      const response = await fetch('http://localhost:8080/api/users/finaliser-demande', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      // Mettre à jour les données de la demande après l'upload
-      setDemande(response.data);
-      setSuccess(true);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Erreur lors de l\'envoi du fichier');
-    } finally {
-      setUploading(false);
-    }
-  };
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de l\'envoi de la fiche');
+      }
 
-  const handleDownloadDemandeStage = async () => {
-    try {
-        setDownloading(true);
-        setDownloadError('');
-        
-        const response = await axios.get(
-            `http://localhost:8080/api/users/${demande.id}/generate-demande-stage?token=${token}`,
-            {
-                responseType: 'blob',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            }
-        );
-
-        // Créer un URL pour le blob et déclencher le téléchargement
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'demande-stage.pdf');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setDownloads(prev => ({ ...prev, demandeStage: true }));
-
-    } catch (err) {
-        setDownloadError(err.response?.data?.message || 'Erreur lors du téléchargement de la demande de stage');
-    } finally {
-        setDownloading(false);
-    }
-  };
-
-  const handleDownloadNoteService = async () => {
-    try {
-      setDownloading(true);
-      setDownloadError('');
+      const result = await response.json();
       
-      const response = await axios.get(
-        `http://localhost:8080/api/users/${demande.id}/generate-note-service?token=${token}`,
-        {
-          responseType: 'blob',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
+      // Mettre à jour le statut dans le localStorage
+      const updatedUser = { ...userData, statut: result.statut };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUserData(updatedUser);
 
-      // Créer un URL pour le blob et déclencher le téléchargement
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'note-service.pdf');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setDownloads(prev => ({ ...prev, noteService: true }));
+      toast.success(result.message, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      // Rediriger après un délai
+      setTimeout(() => {
+        navigate('/stagiaire');
+      }, 3000);
 
     } catch (err) {
-      setDownloadError(err.response?.data?.message || 'Erreur lors du téléchargement de la note de service');
+      setError(err.message);
     } finally {
-      setDownloading(false);
+      setLoading(false);
     }
   };
 
-const handleDownloadStaticDocument = async (docName) => {
-  try {
-    setDownloading(true);
-    setDownloadError('');
-
-    // Ajoutez le type MIME approprié selon l'extension
-    const mimeTypes = {
-      '.jpeg': 'image/jpeg',
-      '.jpg': 'image/jpeg',
-      '.png': 'image/png'
-    };
-
-    const ext = docName.slice(docName.lastIndexOf('.'));
-    const mimeType = mimeTypes[ext] || 'application/octet-stream';
-
-    const response = await fetch(`${process.env.PUBLIC_URL}/documents/${docName}`);
-    if (!response.ok) throw new Error("Fichier non trouvé");
-
-    const blob = await response.blob();
-    const correctedBlob = new Blob([blob], { type: mimeType }); // Force le bon type MIME
-
-    const url = window.URL.createObjectURL(correctedBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = docName;
-    document.body.appendChild(link);
-    link.click();
-
-    // Nettoyage retardé
-    setTimeout(() => {
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    }, 100);
-
-    // Mise à jour du statut
-    const downloadKey = {
-      'attestation.jpg': 'staticattestation',
-      'B.jpg': 'staticB',
-      'organigramme.jpg': 'staticorganigramme'
-    }[docName];
-    
-    if (downloadKey) setDownloads(prev => ({ ...prev, [downloadKey]: true }));
-
-  } catch (err) {
-    setDownloadError(`Erreur: ${err.message}`);
-    console.error("Échec du téléchargement:", err);
-  } finally {
-    setDownloading(false);
+  if (!userData) {
+    return <div className="d-flex justify-content-center mt-5"><Spinner animation="border" /></div>;
   }
-};
-
-  if (loading) return <div className="d-flex justify-content-center mt-5"><Spinner animation="border" /></div>;
-  
-  if (error) return (
-    <div className="container mt-5">
-      <Alert variant="danger">
-        <h4>Erreur</h4>
-        <p>{error}</p>
-        <Button variant="primary" onClick={() => navigate('/')}>
-          Retour à l'accueil
-        </Button>
-      </Alert>
-    </div>
-  );
 
   return (
     <div className="container mt-5">
-        <Card>
-            <Card.Header as="h5">Finalisation de votre demande</Card.Header>
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          <Card className="shadow">
+            <Card.Header className="bg-primary text-white">
+              <h4 className="mb-0">Finalisation de votre demande de stage</h4>
+            </Card.Header>
             <Card.Body>
-                {!success ? (
-                    <>
-                        <Card.Text>
-                            Votre demande de stage a été acceptée. Pour finaliser votre dossier, veuillez uploader 
-                            votre fiche d'assurance (format PDF ou image).
-                        </Card.Text>
-                        
-                        <Form onSubmit={handleSubmit}>
-                            <Form.Group controlId="formFile" className="mb-3">
-                                <Form.Label>Fiche d'assurance</Form.Label>
-                                <Form.Control 
-                                    type="file" 
-                                    onChange={(e) => setFile(e.target.files[0])} 
-                                    accept=".pdf,.jpg,.jpeg,.png" 
-                                    required 
-                                />
-                                <Form.Text className="text-muted">
-                                    Formats acceptés: PDF, JPG, JPEG, PNG
-                                </Form.Text>
-                            </Form.Group>
-                            
-                            <Button variant="primary" type="submit" disabled={uploading}>
-                                {uploading ? 'Envoi en cours...' : 'Envoyer'}
-                            </Button>
-                        </Form>
-                    </>
-                ) : (
-                    <>
-                        <Alert variant="success" className="mb-4">
-                            Votre fiche d'assurance a été envoyée avec succès. Votre demande est maintenant complète,telecharger tous ses documents pour pouvoir avoir accès a nos locaux tout au long de votre stage.
-                        </Alert>
-                        
-                        <Row className="mt-4">
-                            <Col md={6}>
-                                <Card className="mb-4">
-                                    <Card.Body>
-                                        <Card.Title>Documents Administratifs</Card.Title>
-                                        
-                                        <Card.Text className="mb-3">
-                                            Téléchargez votre note de service officielle.
-                                        </Card.Text>
-                                        {downloadError && downloadError.includes('note de service') && (
-                                            <Alert variant="danger" className="mb-3">
-                                                {downloadError}
-                                            </Alert>
-                                        )}
-                                        <Button 
-                                            variant="success" 
-                                            onClick={handleDownloadNoteService}
-                                            disabled={downloading}
-                                            className="w-100 mb-3"
-                                        >
-                                            {downloading && downloadError.includes('note de service') 
-                                                ? 'Génération en cours...' 
-                                                : 'Télécharger la Note de Service'}
-                                        </Button>
-                                        
-                                        <Card.Text className="mb-3">
-                                            Téléchargez votre demande de stage officielle.
-                                        </Card.Text>
-                                        {downloadError && downloadError.includes('demande de stage') && (
-                                            <Alert variant="danger" className="mb-3">
-                                                {downloadError}
-                                            </Alert>
-                                        )}
-                                        <Button 
-                                            variant="primary" 
-                                            onClick={handleDownloadDemandeStage}
-                                            disabled={downloading}
-                                            className="w-100 mb-3"
-                                        >
-                                            {downloading && downloadError.includes('demande de stage') 
-                                                ? 'Génération en cours...' 
-                                                : 'Télécharger la Demande de Stage'}
-                                        </Button>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            
-                            <Col md={6}>
-                                <Card className="mb-4">
-                                    <Card.Body>
-                                        <Card.Title>Documents Informatifs</Card.Title>
-                                        
-                                        {staticDocuments.map((doc, index) => (
-                                            <div key={index} className="mb-3">
-                                                <Card.Text>
-                                                    <strong>{doc.displayName}</strong>: {doc.description}
-                                                </Card.Text>
-                                              <Button 
-  variant="outline-primary" 
-  onClick={() => handleDownloadStaticDocument(doc.name)}
-  disabled={downloading}
-  className="w-100"
->
-  {downloading ? 'Téléchargement...' : `Télécharger ${doc.displayName}`}
-</Button>
-                                            </div>
-                                        ))}
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
+              <Alert variant="info">
+                Votre demande a été validée par le service RH. Veuillez maintenant uploader votre 
+                fiche d'assurance pour finaliser votre dossier.
+              </Alert>
 
-                        {allDownloaded && (
-  <Alert variant="info" className="mt-4 text-center">
-    <h5>Processus achevé</h5>
-    <p>Vous débutez votre stage demain à <strong>8H</strong>. Veuillez passer au département des <strong>Ressources Humaines</strong>.</p>
-  </Alert>
-)}
+              {error && <Alert variant="danger">{error}</Alert>}
 
-                      <div className="mt-4 d-flex justify-content-start">
-  <Button
-    variant="outline-secondary"
-    className="px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
-    onClick={() => navigate('/')}
-  >
-    <BsArrowLeftCircleFill size={20} />
-    Retourner à l'accueil
-  </Button>
-</div>
+              <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="formFile" className="mb-4">
+                  <Form.Label>Fiche d'assurance (PDF uniquement)</Form.Label>
+                  <Form.Control 
+                    type="file" 
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    required
+                  />
+                  <Form.Text className="text-muted">
+                    Veuillez uploader votre fiche d'assurance en format PDF.
+                  </Form.Text>
+                </Form.Group>
 
-                    </>
-                )}
+                <div className="d-grid gap-2">
+                  <Button 
+                    variant="primary" 
+                    type="submit" 
+                    disabled={loading}
+                    size="lg"
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                        <span className="ms-2">Envoi en cours...</span>
+                      </>
+                    ) : (
+                      'Envoyer la fiche d\'assurance'
+                    )}
+                  </Button>
+                </div>
+              </Form>
             </Card.Body>
-        </Card>
+            <Card.Footer className="text-muted">
+              Après validation de votre fiche par le service RH, votre dossier sera complet. D'ici 48h la RH vérifiera.
+            </Card.Footer>
+          </Card>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default FinalisationDemande;

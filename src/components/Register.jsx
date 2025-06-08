@@ -53,7 +53,7 @@ const Register = () => {
       }
 
       setSuccess('Inscription réussie! Redirection vers la page de connexion...');
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       setError(err.message);
     }
@@ -187,7 +187,7 @@ const Register = () => {
                     Déjà un compte?{' '}
                     <button 
                       className="btn btn-link p-0"
-                      onClick={() => navigate('/login')}
+                      onClick={() => navigate('/')}
                     >
                       Se connecter
                     </button>

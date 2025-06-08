@@ -30,7 +30,7 @@ function DashboardRH() {
       } catch (err) {
         setError(err.message);
         localStorage.removeItem('token');
-        navigate('/rh/login');
+        navigate('/login');
       }
     };
 
@@ -39,7 +39,7 @@ function DashboardRH() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/rh/login');
+    navigate('/login');
   };
 
   if (loading) {

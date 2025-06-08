@@ -122,7 +122,7 @@ function TableauDeBord() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/loginrh');
+    navigate('/login');
   };
 
   if (loading) return (

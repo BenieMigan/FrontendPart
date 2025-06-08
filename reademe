@@ -7,8 +7,207 @@ sa se passe comme prevu a pars le fait que je veux que pour une demande ayant fi
 
 
 
-  
+function RHValidationAssurance() {
+  const [demandes, setDemandes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDemandes = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:8080/api/rh/demandes?statut=EN_ATTENTE_VALIDATION',
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        setDemandes(response.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDemandes();
+  }, []);
+
+  const handleValidation = async (id, isApproved) => {
+    try {
+      await axios.put(
+        `http://localhost:8080/api/users/${id}/validate-assurance`,
+        { approved: isApproved },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      // Mettre à jour la liste
+      setDemandes(demandes.filter(d => d.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="container mt-5">
+      <h2>Validation des fiches d'assurance</h2>
+      
+      {loading ? (
+        <Spinner animation="border" />
+      ) : (
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Fiche d'assurance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {demandes.map(demande => (
+              <tr key={demande.id}>
+                <td>{demande.nom}</td>
+                <td>{demande.prenom}</td>
+                <td>
+                  <Button 
+                    variant="link"
+                    onClick={() => window.open(
+                      `http://localhost:8080/api/rh/documents/${demande.id}/assurance`,
+                      '_blank'
+                    )}
+                  >
+                    Voir la fiche
+                  </Button>
+                </td>
+                <td>
+                  <Button 
+                    variant="success" 
+                    className="me-2"
+                    onClick={() => handleValidation(demande.id, true)}
+                  >
+                    Accepter
+                  </Button>
+                  <Button 
+                    variant="danger"
+                    onClick={() => handleValidation(demande.id, false)}
+                  >
+                    Rejeter
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </div>
+  );
+}
+
+
+### 5. Ajoutez un endpoint dans RHController.java pour récupérer les demandes en attente
+
+```java
+@GetMapping("/demandes")
+public ResponseEntity<?> getAllDemandes(
+        @RequestHeader("Authorization") String authHeader,
+        @RequestParam(required = false) String statut) {
+    
+    try {
+        // Vérification auth RH
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = jwtTokenService.validateAndGetUserId(token);
+        User rhUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        if (!"RH".equals(rhUser.getRole())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<User> demandes;
+        if (statut != null) {
+            demandes = userRepository.findByRoleAndStatut("STAGIAIRE", statut);
+        } else {
+            demandes = userRepository.findByRole("STAGIAIRE");
+        }
+
+        return ResponseEntity.ok(demandes.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList()));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+    }
+}
 
 
 
- 
+
+
+
+
+
+
+
+
+
+
+  @PutMapping("/{id}/upload-assurance")
+    public ResponseEntity<?> uploadFicheAssurance(
+            @PathVariable Long id,
+            @RequestParam("assurance") MultipartFile file,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            // Validation du token
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtTokenService.validateAndGetUserId(token);
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+            // Vérifications
+            if (!userId.equals(id)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            if (!"STAGIAIRE".equals(user.getRole())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            if (!"VALIDEE".equals(user.getStatut())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Le statut doit être VALIDEE");
+            }
+            // Sauvegarde du fichier
+            String ficheAssurancePath = fileStorageService.storeFile(file);
+            user.setFicheAssurancePath(ficheAssurancePath);
+            user.setStatut("DOCUMENT_COMPLET"); // Mise à jour du statut
+
+
+            // Mettre à jour les dates
+            LocalDate now = LocalDate.now();
+            user.setDateDebut(now); // Date de début = date de finalisation
+            user.setDateFin(now.plusMonths(3)); // Date de fin = 3 mois après
+
+
+            // Mise à jour des places occupées dans les directions
+            for (String directionNom : user.getDirections()) {
+                Direction direction = directionRepository.findByNom(directionNom)
+                        .orElseThrow(() -> new RuntimeException("Direction non trouvée"));
+                direction.setPlacesOccupees(direction.getPlacesOccupees() + 1);
+                directionRepository.save(direction);
+            }
+
+            User updatedUser = userRepository.save(user);
+            return ResponseEntity.ok(convertToResponseDTO(updatedUser));
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erreur lors du stockage du fichier"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
