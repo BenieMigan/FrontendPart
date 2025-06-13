@@ -1,20 +1,20 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
-import DashboardRH from './components/DashboardRH';
-import DashboardStagiaire from "./components/DashboardStagiaire";
-import FinalisationDemande from './components/FinalisationDemande';
-import Login from './components/Login';
-import ProtectedRoute from './components/ProtectedRoute';
-import RHSpace from "./components/RHSpace";
-import RHValidation from './components/RHValidation';
-import Register from './components/Register';
-import ResetPassword from "./components/ResetPassword";
-import StageForm from './components/StageForm';
-import StagiaireSpace from './components/StagiaireSpace';
-import TableauDeBord from './components/TableauDeBord';
-import UploadAssurance from './components/UploadAssurance';
-import DocumentDownload from './components/DocumentDownload';
+import DashboardRH from './component/DashboardRH';
+import DashboardStagiaire from "./component/DashboardStagiaire";
+import FinalisationDemande from './component/FinalisationDemande';
+import Login from './component/Login';
+import ProtectedRoute from './component/ProtectedRoute';
+import RHSpace from "./component/RHSpace";
+import RHValidation from './component/RHValidation';
+import Register from './component/Register';
+import ResetPassword from "./component/ResetPassword";
+import StageForm from './component/StageForm';
+import StagiaireSpace from './component/StagiaireSpace';
+import TableauDeBord from './component/TableauDeBord';
+import UploadAssurance from './component/UploadAssurance';
+import DocumentDownload from './component/DocumentDownload';
 
           
 

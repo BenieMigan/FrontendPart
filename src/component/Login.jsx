@@ -137,7 +137,7 @@ const handleSubmit = async (e) => {
                     {error}
                   </div>
                 )}
-
+                <Button variant="outline">Button</Button>
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">Email</label>
