@@ -63,7 +63,7 @@ export default function index() {
             <footer className="pb-6 px-6">
             <div className="text-center">
                 <p className="text-white/60 text-sm">
-                © 2024 Port Autonome de Cotonou - Tous droits réservés
+                © 2025 Port Autonome de Cotonou - Tous droits réservés
                 </p>
             </div>
             </footer>
