@@ -1,13 +1,21 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Connexion from '@/feature/Connexion/index';
+import Landing from '@/feature/LandingPage/Landing'
+import DemandeStage from '@/feature/DemandeStage/DemandeStage'
 import Register from '@/feature/Register'
 export default function AppRoutes() {
     return (
         <Router>
             <Routes>
-                <Route path="/connexion" element={<Connexion />} />
-                <Route path="/RegisterForm" element={<Register />} />
+                {/* Page d'accueil */}
+                <Route path = "/" element={<Landing/>} />
+                {/* Page de connexion */}
+                <Route path = "connexion" element={<Connexion/>} />
+                {/* Page demande de stage */}
+                <Route path="/demande-stage" element={<DemandeStage />} />
+                <Route path="/register" element={<Register/>} />
+
             </Routes>
         </Router>
     );
