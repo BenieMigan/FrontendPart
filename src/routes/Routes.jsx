@@ -1,6 +1,6 @@
-import React from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import Connexion from '@/feature/Connexion/index'
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Connexion from '@/feature/Connexion/index';
 import Landing from '@/feature/LandingPage/Landing'
 import DemandeStage from '@/feature/DemandeStage/DemandeStage'
 import Register from '@/feature/Register'
@@ -18,5 +18,5 @@ export default function AppRoutes() {
 
             </Routes>
         </Router>
-    )
+    );
 }
