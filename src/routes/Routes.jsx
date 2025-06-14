@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Connexion from '@/feature/Connexion/index'
 import Landing from '@/feature/LandingPage/Landing'
 import DemandeStage from '@/feature/DemandeStage/DemandeStage'
+import Register from '@/feature/Register'
 export default function AppRoutes() {
     return (
         <Router>
@@ -13,6 +14,8 @@ export default function AppRoutes() {
                 <Route path = "connexion" element={<Connexion/>} />
                 {/* Page demande de stage */}
                 <Route path="/demande-stage" element={<DemandeStage />} />
+                <Route path="/register" element={<Register/>} />
+
             </Routes>
         </Router>
     )
