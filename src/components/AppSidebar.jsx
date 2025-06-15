@@ -27,11 +27,7 @@ const menuItems = [
     icon: FileText,
     id: "request" 
   },
-  {
-    title: "Gestion des demandes",
-    icon: Settings,
-    id: "requestManagement" 
-  },
+ 
   {
     title: "Suivi de ma demande",
     icon: Eye,
@@ -46,6 +42,11 @@ const menuItems = [
     title: "Mes documents",
     icon: FolderOpen,
     id: "documents"
+  },
+   {
+    title: "Gestion des demandes",
+    icon: Settings,
+    id: "requestManagement" 
   },
   {
     title: "Profil",

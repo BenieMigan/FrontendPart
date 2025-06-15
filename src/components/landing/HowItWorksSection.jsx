@@ -1,5 +1,6 @@
 import { User, FileText, Eye, Upload, Download } from 'lucide-react';
-
+ import { useNavigate } from 'react-router-dom';
+              
 const steps = [
   {
     icon: User,
@@ -29,6 +30,8 @@ const steps = [
 ];
 
 const HowItWorksSection = () => {
+const navigate = useNavigate();
+
   return (
     <section id="about" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -81,9 +84,12 @@ const HowItWorksSection = () => {
             <p className="text-gray-600 mb-6">
               Rejoignez les centaines d'étudiants qui ont déjà bénéficié de notre plateforme numérique
             </p>
-            <button className="bg-port-gold hover:bg-port-gold/90 text-port-navy font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105">
+            <button onClick={() => navigate('/connexion')}
+              className="bg-port-gold hover:bg-port-gold/90 text-port-navy font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105">
               Commencer ma demande
+            
             </button>
+            
           </div>
         </div>
       </div>
