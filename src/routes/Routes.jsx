@@ -6,6 +6,7 @@ import DemandeStage from '@/feature/DemandeStage/DemandeStage'
 import Register from '@/feature/Register'
 import DashboardStagiaire from '@/feature/DashboardSatgiaire/DashboardStagiaire';
 import SupervisorDashboard from '@/feature/SupervisorDashboard/SupervisorDashboard';
+import DepartmentHeadDashboard from '@/feature/ChefDepartment/DepartmentHeadDashboard';
 export default function AppRoutes() {
     return (
         <Router>
@@ -19,6 +20,7 @@ export default function AppRoutes() {
                 <Route path="/register" element={<Register/>} />
                 <Route path="/stagiaire/dashboard" element={<DashboardStagiaire/>} />
                 <Route path="/supervisor/dashboard" element={<SupervisorDashboard/>} />
+                <Route path="/chefdepartement/dashboard" element={<DepartmentHeadDashboard/>} />
             </Routes>
         </Router>
     );
