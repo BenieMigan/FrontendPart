@@ -4,6 +4,7 @@ import Connexion from '@/feature/Connexion/index';
 import Landing from '@/feature/LandingPage/Landing'
 import DemandeStage from '@/feature/DemandeStage/DemandeStage'
 import Register from '@/feature/Register'
+import DashboardStagiaire from '@/feature/DashboardSatgiaire/DashboardStagiaire';
 export default function AppRoutes() {
     return (
         <Router>
@@ -15,7 +16,7 @@ export default function AppRoutes() {
                 {/* Page demande de stage */}
                 <Route path="/demande-stage" element={<DemandeStage />} />
                 <Route path="/register" element={<Register/>} />
-
+                <Route path="/stagiaire/dashboard" element={<DashboardStagiaire/>} />
             </Routes>
         </Router>
     );
