@@ -5,6 +5,7 @@ import Landing from '@/feature/LandingPage/Landing'
 import DemandeStage from '@/feature/DemandeStage/DemandeStage'
 import Register from '@/feature/Register'
 import DashboardStagiaire from '@/feature/DashboardSatgiaire/DashboardStagiaire';
+import SupervisorDashboard from '@/feature/SupervisorDashboard/SupervisorDashboard';
 export default function AppRoutes() {
     return (
         <Router>
@@ -17,6 +18,7 @@ export default function AppRoutes() {
                 <Route path="/demande-stage" element={<DemandeStage />} />
                 <Route path="/register" element={<Register/>} />
                 <Route path="/stagiaire/dashboard" element={<DashboardStagiaire/>} />
+                <Route path="/supervisor/dashboard" element={<SupervisorDashboard/>} />
             </Routes>
         </Router>
     );
