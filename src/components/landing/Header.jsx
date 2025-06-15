@@ -11,7 +11,7 @@ const Header = () => {
   const menuItems = [
     { label: 'Accueil', href: '/' },
     { label: 'À propos', href: '#about' },
-    { label: 'Faire une demande', href: '/demande-stage' },
+    { label: 'Faire une demande', href: '/connexion' },
   ];
 
   const handleNavigation = (href) => {
