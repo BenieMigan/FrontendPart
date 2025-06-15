@@ -8,6 +8,9 @@ import DashboardStagiaire from '@/feature/DashboardSatgiaire/DashboardStagiaire'
 import SupervisorDashboard from '@/feature/SupervisorDashboard/SupervisorDashboard';
 import ResetPassword from '@/feature/ResetPassword';
 import DepartmentHeadDashboard from '@/feature/ChefDepartment/DepartmentHeadDashboard';
+import AdminDashboard from '@/feature/AdminDashboard/AdminDashboard';
+import RHDashboard from '@/feature/RHDashboard/RHDashboard';
+import SecretaryDashboard from '@/feature/SecretaireDashboard/SecretaryDashboard';
 export default function AppRoutes() {
     return (
         <Router>
@@ -23,6 +26,9 @@ export default function AppRoutes() {
                 <Route path="/supervisor/dashboard" element={<SupervisorDashboard/>} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/chefdepartement/dashboard" element={<DepartmentHeadDashboard/>} />
+                <Route path = "/admin/dashboard" element={<AdminDashboard/>}/>
+                <Route path = "rh/dashbord" element = {<RHDashboard/>} />
+                <Route path = "secretaire/dashboard" element = {<SecretaryDashboard/>} />
             </Routes>
         </Router>
     );
