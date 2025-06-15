@@ -12,7 +12,7 @@ const mockInterns = [
   {
     id: "1",
     name: "Kossi Rodrigue",
-    department: "Informatique",
+    department: "Direction Commerciale et du Marketing",
     duration: "3 mois",
     startDate: "2025-06-01",
     endDate: "2025-08-31",
@@ -21,7 +21,7 @@ const mockInterns = [
   {
     id: "2",
     name: "Aminata Bio",
-    department: "Logistique",
+    department: "Direction des Infrastructures",
     duration: "2 mois",
     startDate: "2025-06-15",
     endDate: "2025-08-15",
@@ -30,7 +30,7 @@ const mockInterns = [
   {
     id: "3",
     name: "Jean-Baptiste Doe",
-    department: "Finance",
+    department: "Direction des Opérations Portuaires et de la Sécurité",
     duration: "4 mois",
     startDate: "2025-05-01",
     endDate: "2025-08-31",
@@ -58,7 +58,7 @@ export function SupervisorHomeView() {
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const departments = ["all", "Informatique", "Logistique", "Finance"];
+  const departments = ["all", "Direction des Infrastructures", "Direction Commerciale et du Marketing", "Direction des Opérations Portuaires et de la Sécurité"];
 
   const filteredInterns = mockInterns.filter(intern => {
     const matchesSearch = intern.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

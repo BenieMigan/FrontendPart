@@ -19,7 +19,7 @@ export function DepartmentHeadHomeView() {
     <div className="space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-port-navy mb-2">Tableau de bord</h1>
-        <p className="text-gray-600">Service Informatique - Vue d'ensemble</p>
+        <p className="text-gray-600">Direction Commerciale et du Marketing - Vue d'ensemble</p>
       </div>
 
       {/* Statistiques principales */}
@@ -135,32 +135,7 @@ export function DepartmentHeadHomeView() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Actions rapides */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-port-navy">Actions rapides</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-              <Users className="h-8 w-8 text-port-blue mx-auto mb-2" />
-              <h3 className="font-medium">Voir tous les stagiaires</h3>
-              <p className="text-sm text-gray-600">Liste complète</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-              <TrendingUp className="h-8 w-8 text-port-gold mx-auto mb-2" />
-              <h3 className="font-medium">Rapport mensuel</h3>
-              <p className="text-sm text-gray-600">Générer un rapport</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-              <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <h3 className="font-medium">Évaluations</h3>
-              <p className="text-sm text-gray-600">Suivi des performances</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+  
     </div>
   );
 }
